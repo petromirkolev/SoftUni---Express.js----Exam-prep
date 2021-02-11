@@ -1,0 +1,29 @@
+<section>
+    <div class="aux">
+        <h1>Available Plays</h1>
+        <div class="home-buttons">
+            <a class="btn create-play" href="/theater/create">Create Theater</a>
+            <a class="btn create-play" href="/theater/sortbydate">Sort by Date</a>
+            <a class="btn create-play" href="/theater/sortbylikes">Sort by Likes</a>
+        </div>
+    </div>
+    <div class="theaters-container">
+
+        {{#each loggedInPlays}}
+        <div>
+            <div class="home-image">
+                <img src="{{imageUrl}}" alt="Card image cap">
+            </div>
+            <div class="info">
+                <h4>{{title}}</h4>
+                <div class="info-buttons">
+                    <a class="btn details" href="/theater/details/{{_id}}">Details</a>
+                    <span class="likes">{{usersLiked.length}} likes</span>
+                </div>
+            </div>
+        </div>
+        {{else}}
+        <h4>No plays yet...</h4>
+        {{/each}}
+    </div>
+</section>
