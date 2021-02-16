@@ -14,7 +14,7 @@ mongoose.connect(config.databaseUrl, {
     if (err) {
         console.error(err);
         throw err;
-    }
+        };
 }, console.log('*'.repeat(5) + ' Database connected ' + '*'.repeat(5)));
 
 require('./config/express')(app);

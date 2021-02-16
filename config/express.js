@@ -9,6 +9,6 @@ module.exports = (app) => {
         extname: '.hbs'
     }));
     app.set('view engine', '.hbs'); 
-    app.use(express.static('static'))
+    app.use(express.static('static'));
 
 };

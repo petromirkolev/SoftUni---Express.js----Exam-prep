@@ -29,8 +29,8 @@ const saveUser = async (req, res) => {
         })
         res.cookie(cookie, token);
         return true;
-    } catch (e) {
-        console.log(e);
+    } catch (error) {
+        console.log(error);
         return res.redirect('/register');
     }
 }
@@ -85,7 +85,7 @@ const checkAuthentication = async (req, res, next) => {
         const user = await User.findById(decodedObject.userID);
         req.user = user;
         next();
-    } catch (e) {
+    } catch (error) {
         return res.redirect('/login');
     }
 }

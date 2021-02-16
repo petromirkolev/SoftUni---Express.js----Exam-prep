@@ -17,7 +17,7 @@ router.get('/', getUserStatus, async (req, res) => {
         guestItems,
         loggedInItems
     });
-})
+});
 
 // Get create theater form
 router.get('/theater/create', checkAuthentication, getUserStatus, async (req, res) => {
@@ -41,10 +41,10 @@ router.get('/theater/details/:id', checkAuthentication, getUserStatus, (req, res
                 ...item
             });
         })
-        .catch((err) => {
-            console.log(err);
+        .catch((error) => {
+            console.log(error);
             res.redirect('/');
-        })
+        });
 });
 
 // Like a play
@@ -53,7 +53,7 @@ router.get('/play/like/:id', checkAuthentication, (req, res) => {
     const itemId = req.params.id;
     const { _id } = req.user;
 
-    Play
+    Item
         .findByIdAndUpdate(itemId, {
             $addToSet: {
                 usersLiked: [_id],
@@ -62,10 +62,10 @@ router.get('/play/like/:id', checkAuthentication, (req, res) => {
         .then((item) => {
             res.redirect(`/theater/details/${itemId}`);
         })
-        .catch((err) => { console.log(err) });
-
-
-})
+        .catch((error) => {
+            console.log(error)
+        });
+});
 
 // Delete a play
 router.get('/play/delete/:id', checkAuthentication, (req, res) => {
@@ -74,10 +74,10 @@ router.get('/play/delete/:id', checkAuthentication, (req, res) => {
         .then((item) => {
             res.redirect('/');
         })
-        .catch((err) => {
-            console.log(err)
+        .catch((error) => {
+            console.log(error)
         });
-})
+});
 
 // Render "Edit a play" page
 router.get('/play/edit/:id', checkAuthentication, (req, res) => {
@@ -86,11 +86,11 @@ router.get('/play/edit/:id', checkAuthentication, (req, res) => {
         .then((item) => {
             res.render('edit-theater', item);
         })
-        .catch((err) => {
-            console.log(err);
+        .catch((error) => {
+            console.log(error);
             res.redirect('/theater/details/:id');
-        })
-})
+        });
+});
 
 // POST requests
 // Create theater request
@@ -99,8 +99,8 @@ router.post('/theater/create', checkAuthentication, itemValidation, async (req, 
     if (!errors.isEmpty()) {
         return res.render('create-theater', {
             message: errors.array()[0].msg,
-        })
-    }
+        });
+    };
     const { title, description, imageUrl, isPublic } = req.body;
     const { _id } = req.user;
     const createdAt = new Date().toLocaleDateString();
@@ -118,32 +118,30 @@ router.post('/theater/create', checkAuthentication, itemValidation, async (req, 
             console.log
             res.redirect('/');
         })
-        .catch((err) => {
-            console.log(err);
+        .catch((error) => {
+            console.log(error);
             res.redirect('/');
-        })
-
-
-})
+        });
+});
 
 // Edit a play page request
 router.post('/play/edit/:id', checkAuthentication, (req, res) => {
     const { title, description, imageUrl, isPublic } = req.body;
-    Item.updateOne(
-        { _id: req.params.id },
+    Item.updateOne({
+        _id: req.params.id
+    },
         {
-            $set: { 
+            $set: {
                 title,
                 description,
                 imageUrl,
                 isPublic: isPublic == 'on' ? true : false
-         } }
-    )
+            }
+        })
         .then((updatedItem) => {
             console.log(updatedItem);
             res.redirect('/');
-        })
-})
-
+        });
+});
 
 module.exports = router;
