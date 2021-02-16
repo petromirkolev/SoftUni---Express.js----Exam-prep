@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Schema.Types; 
 
-const PlaySchema = new mongoose.Schema({
+const itemSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
@@ -35,4 +35,4 @@ const PlaySchema = new mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('Play', PlaySchema);
+module.exports = mongoose.model('Item', itemSchema);

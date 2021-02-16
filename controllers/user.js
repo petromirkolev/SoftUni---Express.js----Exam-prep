@@ -3,7 +3,7 @@ const config = require('../config/config')[env];
 const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const { development } = require('../config/config');
+const { development, saltRounds, cookie, privateKey } = require('../config/config');
 
 const generateToken = data => {
     const token = jwt.sign(data, config.privateKey);
@@ -12,7 +12,7 @@ const generateToken = data => {
 
 const saveUser = async (req, res) => {
     const { username, password } = req.body;
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(password, salt);
 
     const user = new User({
@@ -27,13 +27,12 @@ const saveUser = async (req, res) => {
             userID: userObject._id,
             username: userObject.username
         })
-        res.cookie(development.cookie, token);
+        res.cookie(cookie, token);
         return true;
     } catch (e) {
         console.log(e);
         return res.redirect('/register');
     }
-
 }
 
 const verifyUser = async (req, res) => {
@@ -47,29 +46,28 @@ const verifyUser = async (req, res) => {
             userID: user._id,
             username: user.username
         });
-        res.cookie(development.cookie, token);
+        res.cookie(cookie, token);
     }
     return status;
 }
 
 const getUserStatus = (req, res, next) => {
-    const token = req.cookies[development.cookie];
+    const token = req.cookies[cookie];
     if (!token) {
         req.isLoggedIn = false;
     }
 
     try {
-        jwt.verify(token, config.privateKey);
+        jwt.verify(token, privateKey);
         req.isLoggedIn = true;
     } catch (e) {
         req.isLoggedIn = false;
     }
-    next()
-
+    next();
 }
 
 const checkGuestAccess = (req, res, next) => {
-    const token = req.cookies[development.cookie];
+    const token = req.cookies[cookie];
     if (token) {
         return res.redirect('/');
     }
@@ -77,20 +75,19 @@ const checkGuestAccess = (req, res, next) => {
 }
 
 const checkAuthentication = async (req, res, next) => {
-    const token = req.cookies[development.cookie];
+    const token = req.cookies[cookie];
     if (!token) {
         return res.redirect('/');
     }
 
     try {
-        decodedObject = jwt.verify(token, config.privateKey);
+        decodedObject = jwt.verify(token, privateKey);
         const user = await User.findById(decodedObject.userID);
         req.user = user;
         next();
     } catch (e) {
         return res.redirect('/login');
     }
-
 }
 
 

@@ -1,27 +1,27 @@
-const Play = require('../models/play');
+const Item = require('../models/item');
 
-const getAllPlays = async (callback) => {
-    const play = await Play.find().lean();
-    return play;
+const getAllItems = async (callback) => {
+    const item = await Item.find().lean();
+    return item;
 }
 
 const sortByLikes = async () => {
-    const plays = await getAllPlays();
-    return plays
+    const items = await getAllItems();
+    return items
         .filter(x => x.isPublic === true)
         .sort((a, b) => a.usersLiked.length - b.usersLiked.length);
 }
 
 const sortByDate = async () => {
-    const plays = await getAllPlays();
-    return plays
+    const items = await getAllItems();
+    return items
         .filter(x => x.isPublic === true)
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }
 
 
 module.exports = {
-    getAllPlays,
+    getAllItems,
     sortByLikes,
     sortByDate
 }

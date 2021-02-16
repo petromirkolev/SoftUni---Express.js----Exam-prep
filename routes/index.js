@@ -1,21 +1,21 @@
 const { Router } = require('express');
 const { validationResult } = require('express-validator');
 const { getUserStatus, checkAuthentication } = require('../controllers/user');
-const validation = require('../controllers/validation');
-const Play = require('../models/play');
-const { sortByLikes, sortByDate } = require('../controllers/play');
+const itemValidation = require('../controllers/itemValidation');
+const Item = require('../models/item');
+const { sortByLikes, sortByDate } = require('../controllers/item');
 const router = Router();
 
 // GET requests
 // Get Home
 router.get('/', getUserStatus, async (req, res) => {
-    const guestPlays = await sortByLikes();
-    const loggedInPlays = await sortByDate();
+    const guestItems = await sortByLikes();
+    const loggedInItems = await sortByDate();
 
     res.render('home', {
         isLoggedIn: req.isLoggedIn,
-        guestPlays,
-        loggedInPlays
+        guestItems,
+        loggedInItems
     });
 })
 
@@ -28,17 +28,17 @@ router.get('/theater/create', checkAuthentication, getUserStatus, async (req, re
 
 // Get play details
 router.get('/theater/details/:id', checkAuthentication, getUserStatus, (req, res) => {
-    Play
+    Item
         .findById(req.params.id)
         .lean()
-        .then((play) => {
-            const isCreator = play.creator.toString() === req.user._id.toString();
-            const isLiked = play.usersLiked.filter(x => x.toString() === req.user._id.toString());
+        .then((item) => {
+            const isCreator = item.creator.toString() === req.user._id.toString();
+            const isLiked = item.usersLiked.filter(x => x.toString() === req.user._id.toString());
             res.render('theater-details', {
                 isLoggedIn: req.isLoggedIn,
                 isLiked,
                 isCreator,
-                ...play
+                ...item
             });
         })
         .catch((err) => {
@@ -50,17 +50,17 @@ router.get('/theater/details/:id', checkAuthentication, getUserStatus, (req, res
 // Like a play
 router.get('/play/like/:id', checkAuthentication, (req, res) => {
 
-    const playId = req.params.id;
+    const itemId = req.params.id;
     const { _id } = req.user;
 
     Play
-        .findByIdAndUpdate(playId, {
+        .findByIdAndUpdate(itemId, {
             $addToSet: {
                 usersLiked: [_id],
             }
         })
-        .then((play) => {
-            res.redirect(`/theater/details/${playId}`);
+        .then((item) => {
+            res.redirect(`/theater/details/${itemId}`);
         })
         .catch((err) => { console.log(err) });
 
@@ -69,9 +69,9 @@ router.get('/play/like/:id', checkAuthentication, (req, res) => {
 
 // Delete a play
 router.get('/play/delete/:id', checkAuthentication, (req, res) => {
-    Play
+    Item
         .deleteOne({ _id: req.params.id })
-        .then((play) => {
+        .then((item) => {
             res.redirect('/');
         })
         .catch((err) => {
@@ -81,10 +81,10 @@ router.get('/play/delete/:id', checkAuthentication, (req, res) => {
 
 // Render "Edit a play" page
 router.get('/play/edit/:id', checkAuthentication, (req, res) => {
-    Play
+    Item
         .findOne({ _id: req.params.id })
-        .then((play) => {
-            res.render('edit-theater', play);
+        .then((item) => {
+            res.render('edit-theater', item);
         })
         .catch((err) => {
             console.log(err);
@@ -94,7 +94,7 @@ router.get('/play/edit/:id', checkAuthentication, (req, res) => {
 
 // POST requests
 // Create theater request
-router.post('/theater/create', checkAuthentication, validation, async (req, res) => {
+router.post('/theater/create', checkAuthentication, itemValidation, async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.render('create-theater', {
@@ -104,7 +104,7 @@ router.post('/theater/create', checkAuthentication, validation, async (req, res)
     const { title, description, imageUrl, isPublic } = req.body;
     const { _id } = req.user;
     const createdAt = new Date().toLocaleDateString();
-    const play = new Play({
+    const item = new Item({
         title,
         description,
         imageUrl,
@@ -112,7 +112,7 @@ router.post('/theater/create', checkAuthentication, validation, async (req, res)
         createdAt,
         creator: _id,
     });
-    play
+    item
         .save()
         .then((play) => {
             console.log
@@ -129,7 +129,7 @@ router.post('/theater/create', checkAuthentication, validation, async (req, res)
 // Edit a play page request
 router.post('/play/edit/:id', checkAuthentication, (req, res) => {
     const { title, description, imageUrl, isPublic } = req.body;
-    Play.updateOne(
+    Item.updateOne(
         { _id: req.params.id },
         {
             $set: { 
@@ -139,8 +139,8 @@ router.post('/play/edit/:id', checkAuthentication, (req, res) => {
                 isPublic: isPublic == 'on' ? true : false
          } }
     )
-        .then((updatedPlay) => {
-            console.log(updatedPlay);
+        .then((updatedItem) => {
+            console.log(updatedItem);
             res.redirect('/');
         })
 })
